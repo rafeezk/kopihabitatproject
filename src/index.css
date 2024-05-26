@@ -28,17 +28,33 @@ header.sticky {
   transition: 0.4s;
   border-bottom-width: 1px;
   border-color: black;
-  @apply fixed w-full bg-white text-black z-50 py-3;
+  @apply fixed w-full bg-white text-black z-50 py-3 dark:bg-black;
 }
 
 header.sticky .navbar-start h2,
 header.sticky .navbar-center h2,
 header.sticky #iconcart {
   color: black; /* Ubah warna teks menjadi putih */
+  @apply dark:text-white
 }
 
+header.sticky svg {
+  color:black;
+  @apply dark:text-white
+}
 #home {
   background-image: url(/public/images/homebg.png);
   background-size: cover;
   background-position: center;
+}
+
+.cancel-button-class {
+  color: black !important; /* Sets the text color to black */
+  border: 1px solid black !important; /* Adds a black border */
+}
+
+.cancel-button-class:hover {
+  transition: .5s;
+  background-color: black !important; /* Changes background to black on hover */
+  color: white !important; /* Changes text color to white on hover */
 }

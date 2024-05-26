@@ -11,7 +11,7 @@ const Navbar = () => {
   // const [greetingMessage, setGreetingMessage] = useState('');
 
   const totalCart = async () => {
-    const { data } = await supabase.from("coffeecart").select("*");
+    const { data } = await supabase.from("coffeecart").select("*").eq("id_user", user.id);
     setGetTotalCart(data.length);
   };
 
@@ -54,13 +54,13 @@ const Navbar = () => {
     // greetingTime();
 
     supabase
-      .channel("cart")
+      .channel("d0ffeecart")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "cart",
+          table: "coffeecart",
         },
         () => {
           totalCart();
@@ -90,16 +90,16 @@ const Navbar = () => {
   };
 
   return (
-    <header className="navbar bg-white border-b border-black px-7 py-3 text-black absolute backdrop-filter-none z-10">
+    <header className="navbar bg-white border-b border-black px-7 py-3 text-black dark:bg-black dark:text-white absolute backdrop-filter-none z-10">
       <div className="navbar-start">
         <a className="btn btn-ghost text-xl">kopihabitat.</a>
       </div>
-      <div className="navbar-center lg:flex">
-        <ul className="menu-horizontal gap-8 px-1">
+      <div className="navbar-center lg:flex ">
+        <ul className="menu-horizontal gap-8 px-1 ">
           <li>
             <Link
               to="/"
-              className="text-black hover:text-[#0B6E4F] transition cursor-pointer"
+              className="text-black dark:text-white hover:text-[#0B6E4F] transition cursor-pointer"
               href="#about"
             >
               Home
@@ -107,7 +107,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              className="text-black hover:text-[#0B6E4F] transition cursor-pointer"
+              className="text-black dark:text-white hover:text-[#0B6E4F] transition cursor-pointer"
               href="#about"
             >
               About
@@ -115,7 +115,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              className="text-black hover:text-[#0B6E4F] transition cursor-pointer"
+              className="text-black dark:text-white hover:text-[#0B6E4F] transition cursor-pointer"
               href="#product"
             >
               Product
@@ -123,7 +123,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              className="text-black hover:text-[#0B6E4F] transition cursor-pointer"
+              className="text-black dark:text-white hover:text-[#0B6E4F] transition cursor-pointer"
               href="#service"
             >
               Service

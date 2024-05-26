@@ -9,6 +9,7 @@ import BeanDetail from "./pages/BeanDetail";
 import CoffeeDetail from "./pages/CoffeeDetail";
 import CartPage from "./pages/CartPage";
 import ProfilePage from "./pages/ProfilePage"
+import HistoryPage from "./pages/HistoryPage"
 
 // library
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -18,6 +19,7 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { far } from "@fortawesome/free-regular-svg-icons";
 import SettingPage from "./pages/SettingPage";
+import ComingSoon from "./pages/ComingSoon";
 
 function App() {
   return (
@@ -28,12 +30,13 @@ function App() {
         <Route path="/register" element={<Register/>}/>
         <Route path="/detail/:id" element={<BeanDetail />} />
         <Route path="/coffee-detail/:id" element={<CoffeeDetail />} />
+        <Route path="/comingsoon" element={<ComingSoon />} />
         
         <Route element={<AuthRoute />}>
           <Route path="/cart" element={<CartPage/>} />
           <Route path="/profile" element={<ProfilePage/>} />
           <Route path="/setting" element={<SettingPage/>} />
-          {/* <Route path="/history" element={<HistoryPage/>} /> */}
+          <Route path="/history" element={<HistoryPage/>} />
         </Route>
 
         <Route element={<AuthAdmin />}>

@@ -1,11 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "../createClient";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 const ListData = () => {
   const [coffees, setCoffees] = useState([]);
 
   const [imageUpload, setImageUpload] = useState([]);
+
+  const [getTotalItems, setGetTotalItems] = useState("");
 
   const [coffee, setCoffee] = useState({
     coffee_name: "",
@@ -25,6 +28,7 @@ const ListData = () => {
   });
 
   useEffect(() => {
+    totalItems();
     fetchData();
   }, []);
 
@@ -69,28 +73,43 @@ const ListData = () => {
   };
 
   const deleteData = async (id) => {
-    const { data: getImageProduct } = await supabase
-      .from("coffees")
-      .select("images")
-      .eq("id", id);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#fff",
+      confirmButtonText: "Yes, delete it!",
+      customClass: {
+        cancelButton: "cancel-button-class", // Custom class for the cancel button
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const { data: getImageProduct } = await supabase
+          .from("coffees")
+          .select("images")
+          .eq("id", id);
 
-    const { data: getImage } = await supabase.storage
-      .from("coffee_images")
-      .remove([`images/${getImageProduct[0].images}`]);
+        const { data: getImage } = await supabase.storage
+          .from("coffee_images")
+          .remove([`images/${getImageProduct[0].images}`]);
 
-    const { error } = await supabase.from("coffees").delete().eq("id", id);
-    if (!error && getImage) {
-      alert("delete data successfull");
-      window.location.reload();
-    }
-    fetchData();
+        const { error } = await supabase.from("coffees").delete().eq("id", id);
+        if (!error && getImage) {
+          Swal.fire("Deleted!", "Your data has been deleted.", "success");
+          // window.location.reload();
+        }
+        fetchData();
+      }
+    });
   };
 
-  async function updateData(userId) {
-    // e.preventDefault()
-    const filename = `${uuidv4(imageUpload.name)}`;
-
-    if (imageUpload.length === 0) {
+  const updateData = async (userId) => {
+    const filename = imageUpload ? `${uuidv4()}_${imageUpload.name}` : coffee2.coffee_image;
+  
+    if (!imageUpload) {
+      // Jika tidak ada gambar baru yang diunggah, perbarui hanya data kopi
       const { error } = await supabase
         .from("coffees")
         .update({
@@ -101,46 +120,66 @@ const ListData = () => {
           images: coffee2.coffee_image,
         })
         .eq("id", userId);
-
-      fetchData();
-
-      if (!error) {
-        alert("update succesfull!");
-        window.location.reload();
+  
+      if (error) {
+        console.error("Error updating coffee data:", error.message);
+        Swal.fire("Update Failed!", error.message, "error");
+      } else {
+        fetchData();
+        Swal.fire("Update Successful!", "Your data has been updated.", "success");
+        document.getElementById("my_modal_2").close();
       }
     } else {
-      const { data: deleteImage } = await supabase.storage
+      // Hapus gambar lama
+      const { error: deleteError } = await supabase.storage
         .from("coffee_images")
         .remove([`images/${coffee2.images}`]);
+  
+      if (deleteError) {
+        console.error("Error deleting old image:", deleteError.message);
+        Swal.fire("Delete Failed!", deleteError.message, "error");
+        return; // Hentikan fungsi jika penghapusan gagal
+      } else {
+        // Jika ada gambar baru, unggah gambar baru terlebih dahulu
+      const { error: uploadError } = await supabase.storage
+      .from("coffee_images")
+      .upload(`images/${filename}`, imageUpload, {
+        cacheControl: "3600",
+        upsert: true,
+      });
 
-      if (deleteImage) {
-        const { data: updateData } = await supabase.storage
-          .from("coffee_images")
-          .upload(`images/${filename}`, imageUpload, {
-            cacheControl: "3600",
-            upsert: true,
-          });
-
-        if (updateData) {
-          const { error } = await supabase
-            .from("coffees")
-            .update({
-              coffee_name: coffee2.coffee_name,
-              coffee_description: coffee2.coffee_description,
-              coffee_ingredients: coffee2.coffee_ingredients,
-              coffee_price: coffee2.coffee_price,
-              images: filename,
-            })
-            .eq("id", userId);
-
-          if (!error) {
-            alert("update succesfull!");
-            window.location.reload();
-          }
-        }
-      }
+    if (uploadError) {
+      console.error("Error uploading new image:", uploadError.message);
+      Swal.fire("Upload Failed!", uploadError.message, "error");
+      return; // Hentikan fungsi jika pengunggahan gagal
     }
-  }
+
+    // Perbarui data kopi dengan referensi gambar baru
+    const { error } = await supabase
+      .from("coffees")
+      .update({
+        coffee_name: coffee2.coffee_name,
+        coffee_description: coffee2.coffee_description,
+        coffee_ingredients: coffee2.coffee_ingredients,
+        coffee_price: coffee2.coffee_price,
+        images: filename,
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error updating coffee data with new image:", error.message);
+      Swal.fire("Update Failed!", error.message, "error");
+    } else {
+      fetchData();
+      Swal.fire("Update Successful!", "Your data has been updated.", "success");
+      document.getElementById("my_modal_2").close();
+    }
+      }
+  
+      
+    }
+  };
+  
 
   function handleChange(event) {
     setCoffee((prevFormData) => {
@@ -198,11 +237,23 @@ const ListData = () => {
     return formatter.format(price).replace(",", dot);
   };
 
+  const totalItems = async () => {
+    const { data } = await supabase.from("coffees").select("*");
+
+    setGetTotalItems(data.length);
+  };
+
   return (
-    <section className="">
-      <h2 className="py-8 font-bold text-3xl text-center text-black italic underline">
-        coffee data
-      </h2>
+    <section className="dark:bg-[#221f1f] h-full">
+      <div className="h-screen">
+      <div className="flex lg:flex-row flex-col justify-between items-center lg:px-10 px-0 py-10 ">
+        <h2 className=" font-bold text-3xl text-center text-black dark:text-white italic">
+          coffee data
+        </h2>
+
+        <h3 className="lg:mt-0 mt-2">Total Items: {getTotalItems}</h3>
+      </div>
+
       <div className="overflow-x-auto px-5">
         <div className="py-3">
           <button
@@ -262,6 +313,7 @@ const ListData = () => {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
 
       {/* Modal 1 for adding data */}
@@ -403,7 +455,13 @@ const ListData = () => {
               <button type="submit" className="btn btn-success mt-5">
                 Save Changes
               </button>
-              <button className="btn btn-outline btn-error">Close</button>
+              <button
+                type="button"
+                onClick={() => document.getElementById("my_modal_2").close()}
+                className="btn btn-outline btn-error"
+              >
+                Close
+              </button>
             </form>
           </div>
         </div>

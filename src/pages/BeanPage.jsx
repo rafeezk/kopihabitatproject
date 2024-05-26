@@ -48,23 +48,23 @@ const BeanPage = () => {
   return (
     <>
       <section
-        className="product h-auto bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:h-[92vh] lg:p-0"
+        className="product h-auto bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:h-[92vh] lg:p-0 dark:bg-[#221f1f]"
         id="product"
       >
         <div className="title text-center">
-          <h2 className="font-bold text-2xl sm:text-2xl md:text-3xl pt-11 text-black">
+          <h2 className="font-bold text-2xl sm:text-2xl md:text-3xl pt-11 text-black dark:text-white">
             Special Roasted
           </h2>
-          <p className="text-sm sm:text-base pt-2 pb-2 text-gray-500">
+          <p className="text-sm sm:text-base pt-2 pb-2 text-gray-500 dark:text-gray-400">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis,
             quod?
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-[5rem] items-center justify-center mt-5 sm:mt-8 md:mt-10">
+        <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-[4rem] items-center justify-center mt-5 sm:mt-8 md:mt-10">
           {currentItems.map((item) => (
             <div
-              className="card w-[265px] sm:w-1/2 md:w-1/3 lg:w-60 h-auto md:h-[360px] rounded-md border-[0.1px] border-black shadow-xl text-white p-4 md:p-0"
+              className="card w-[265px] sm:w-1/2 md:w-1/3 lg:w-60 h-auto md:h-[360px] rounded-md border-[0.1px] border-black shadow-xl text-white bg-white dark:bg-[#252525] p-4 md:p-0"
               key={item.id}
             >
               <figure>
@@ -75,16 +75,16 @@ const BeanPage = () => {
                 />
               </figure>
               <div className="card-body">
-                <h2 className="card-title text-black">{truncate(item.name)}</h2>
+                <h2 className="card-title text-black dark:text-white">{truncate(item.name)}</h2>
                 <div className="flex justify-between">
-                  <p className="text-black">{convertToRupiah(item.price)}</p>
-                  <p className="text-black text-end">{item.weight}gr</p>
+                  <p className="text-black dark:text-white">{convertToRupiah(item.price)}</p>
+                  <p className="text-black text-end dark:text-white">{item.weight}gr</p>
                 </div>
               </div>
               <Link to={`/detail/${item.id}`} className="px-5">
                 <button
                   className="btn btn-outline w-full mb-5 text-black font-light border-black transition ease-in-out delay-150 
-                  hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300"
+                  hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300 dark:bg-black dark:text-white"
                 >
                   view details
                 </button>
@@ -98,7 +98,7 @@ const BeanPage = () => {
             {pageNumbers.map((number) => (
               <button
                 key={number}
-                className={`text-black h-10 mt-5 hover:bg-black hover:text-white duration-500 rounded-full w-10 mx-1 
+                className={`text-black dark:text-white h-10 mt-5 hover:bg-black hover:text-white duration-500 rounded-full w-10 mx-1 
                 ${currentPage === number && "bg-black text-white"}`}
                 onClick={() => paginate(number)}
               >

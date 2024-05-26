@@ -4,6 +4,7 @@ import { supabase } from "../createClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons"; // Import FontAwesome icon
 import { useAuth } from "../auth/AuthProvider";
+import Swal from "sweetalert2";
 
 const CoffeePage = () => {
   const [data, setData] = useState([]);
@@ -19,19 +20,18 @@ const CoffeePage = () => {
   }
 
   async function addCart(id) {
-    const { data } = await supabase
-      .from("coffees")
-      .select("*")
-      .eq("id", id)
-      .single();
     try {
+      const { data } = await supabase
+        .from("coffees")
+        .select("*")
+        .eq("id", id);
       if (data) {
         const { error } = await supabase
           .from("coffeecart")
           .insert([
             {
               id_user: user.id,
-              id_product: data.id,
+              id_product: data[0].id,
               cart_name: data.coffee_name,
               cart_description: data.coffee_description,
               cart_ingredients: data.coffee_ingredients,
@@ -39,20 +39,42 @@ const CoffeePage = () => {
               cart_total: 1,
               cart_images: data.images,
             },
-          ])
-          .select();
-        if (!error) {
-          alert("add cart successfull!");
+          ]);
+          if (!error) {
+            Swal.fire({
+              title: 'Success!',
+              text: 'Add to cart successful!',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+          } else {
+            console.error("Error adding to cart:", error.message);
+            Swal.fire({
+              title: 'Error!',
+              text: 'Failed to add to cart.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Product not found.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
-
-        console.log(error);
+      } catch (error) {
+        console.error("Error adding to cart:", error.message);
+        Swal.fire({
+          title: 'Error!',
+          text: 'An error occurred, please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        navigate("/login"); // Ensure 'navigate' is defined and imported from 'react-router-dom'
       }
-      // console.log(data);
-    } catch (error) {
-      console.error("login", error.message);
-      navigate("/login");
     }
-  }
 
   const toRupiah = (price, options = {}) => {
     const dot = options.dot || ".";
@@ -89,15 +111,14 @@ const CoffeePage = () => {
   return (
     <>
         <section
-          className="product h-[92vh] bg-[#F3F4F6]"
-          style={{ backgroundColor: "var(--background-color)" }}
+          className="product h-[92vh] bg-[#F3F4F6] dark:bg-[#221f1f]"
           id="product"
         >
           <div className="title text-center">
-            <h2 className="font-bold text-3xl pt-11 text-black">
+            <h2 className="font-bold text-3xl pt-11 text-black dark:text-white">
               Special Coffee
             </h2>
-            <p className="pt-2 pb-2 text-gray-500">
+            <p className="pt-2 pb-2 text-gray-500 dark:text-gray-400">
               Lorem ipsum dolor sit amet consectetur adipisicing elit.
               Perspiciatis, quaerat.
             </p>
@@ -105,35 +126,36 @@ const CoffeePage = () => {
 
           <div className="flex flex-wrap gap-[5rem] items-center justify-center mt-10">
             {currentItems.map((i) => (
+              <Link to={`/coffee-detail/${i.id}`} key={i.id} className="w-60">
               <div
-                className="card w-60 h-[360px] shadow-xl rounded-lg text-white"
+                className="card h-[360px] shadow-xl rounded-lg text-white transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300 bg-white dark:bg-[#252525]"
                 key={i.id}
               >
                 <figure>
                   <img
                     src={getImage(i.images)}
-                    className="h-40 w-full object-cover mt-5 rounded-t-lg"
+                    className="h-40 w-full object-cover rounded-t-lg"
                     alt="Product"
                   />
                 </figure>
                 <div className="card-body h-32">
-                  <h2 className="card-title text-balance text-black">
+                  <h2 className="card-title text-balance text-black dark:text-white">
                     {i.coffee_name}
                   </h2>
                   <div className="flex">
-                    <p className="text-black">{toRupiah(i.price)}</p>
-                    <p className="text-end text-black">{i.weight}gr</p>
+                    <p className="text-black dark:text-white">{toRupiah(i.coffee_price)}</p>
+                    <p className="text-end text-black dark:text-white">{i.weight}gr</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <Link to={`/coffee-detail/${i.id}`} className="px-5">
-                    <button className="btn btn-outline w-32 mb-5 align-bottom text-black font-light border-black transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300">
+                    <button className="btn btn-outline w-32 mb-5 align-bottom text-black font-light border-black transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300 dark:bg-black dark:text-white">
                       View Details
                     </button>
                   </Link>
                   <Link>
                     <button
-                      className="btn btn-outline w-full mb-5 align-bottom text-black font-light border-black transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300"
+                      className="btn btn-outline w-full mb-5 align-bottom text-black font-light border-black transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-black hover:text-white duration-300 dark:bg-black dark:text-white"
                       onClick={() => addCart(i.id)}
                     >
                       <FontAwesomeIcon icon={faShoppingCart} />{" "}
@@ -142,6 +164,7 @@ const CoffeePage = () => {
                   </Link>
                 </div>
               </div>
+              </Link>
             ))}
           </div>
 
@@ -150,7 +173,7 @@ const CoffeePage = () => {
               {pageNumbers.map((number) => (
                 <button
                   key={number}
-                  className={`border border-black text-black h-10 mt-5 hover:bg-black hover:text-white duration-500 rounded-full w-10 mx-1 ${
+                  className={`text-black dark:text-white  h-10 mt-5 hover:bg-black hover:text-white duration-500 rounded-full w-10 mx-1 ${
                     currentPage === number && "bg-black text-white"
                   }`}
                   onClick={() => paginate(number)}

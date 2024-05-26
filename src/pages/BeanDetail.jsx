@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { InfinitySpin } from "react-loader-spinner";
 
 const BeanDetail = () => {
   const [getBean, setGetBean] = useState([]);
+  const [loading, setLoading] = useState(true);
   // const [showFullDesc, setShowFullDesc] = useState(false);
   const { id } = useParams();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
     const fetchData = async () => {
       try {
         const response = await fetch(
@@ -43,15 +49,26 @@ const BeanDetail = () => {
 
   return (
     <>
+      {loading ? (
+        <div className="h-screen bg-white flex justify-center items-center">
+          <InfinitySpin
+            visible={true}
+            width="200"
+            color="#000"
+            ariaLabel="infinity-spin-loading"
+          />
+        </div>
+      ) : (
+    <>
       <Navbar />
-      <section className="h-screen flex justify-center items-center bg-[#F3F4F6]">
+      <section className="h-screen flex justify-center items-center bg-[#F3F4F6] dark:bg-[#221f1f]">
         <div className="pt-10">
           {getBean.map((i) => (
             <div
-              className="card lg:card-side h-auto lg:h-[550px] w-full lg:w-[1300px] border border-black lg:rounded-sm rounded-none shadow-sm bg-white"
+              className="card lg:card-side h-auto lg:h-[550px] w-full lg:w-[1300px] border border-black dark:border-white lg:rounded-sm rounded-none shadow-sm bg-white dark:bg-[#252525]"
               key={i.id}
             >
-              <figure className="w-full lg:w-[640px] border-e-[1px] border-black">
+              <figure className="w-full lg:w-[640px] border-e-[1px] border-black dark:border-white">
                 <img
                   src={i.image_url}
                   className="object-cover h-full w-full"
@@ -59,18 +76,18 @@ const BeanDetail = () => {
                 />
               </figure>
               <div>
-                <h2 className="card-title text-4xl text-black px-8 mt-8">
+                <h2 className="card-title text-4xl text-black dark:text-white px-8 mt-8">
                   {i.name}
                 </h2>
-                <div className="flex flex-row gap-3 h-40 border-b border-black px-8">
-                  <h2 className="text-base text-black">region: {i.region}</h2>
-                  <h2 className="text-base text-black">
+                <div className="flex flex-row gap-3 h-40 border-b border-black dark:border-white px-8">
+                  <h2 className="text-base text-black dark:text-white">region: {i.region}</h2>
+                  <h2 className="text-base text-black dark:text-white">
                     flavor: {i.flavor_profile}
                   </h2>
-                  <h2 className="text-base text-black">
+                  <h2 className="text-base text-black dark:text-white">
                     roast level: {i.roast_level}
                   </h2>
-                  <h2 className="text-base text-black">
+                  <h2 className="text-base text-black dark:text-white">
                     grind option: {i.grind_option.join(", ")}.
                   </h2>
                 </div>
@@ -90,16 +107,16 @@ const BeanDetail = () => {
                   )}
               </p> */}
                 <div className="flex justify-between h-[317px]">
-                  <div className="flex-col w-1/2 border-e-[1px] border-black">
-                    <h1 className="p-5 text-xl text-black text-justify">
+                  <div className="flex-col w-1/2 border-e-[1px] border-black dark:border-white">
+                    <h1 className="p-5 text-xl text-black text-justify dark:text-white">
                       {truncate(i.description)}
                     </h1>
                   </div>
                   <div className="w-1/2 p-5">
-                    <h2 className="text-xl text-black font-semibold">
+                    <h2 className="text-xl text-black font-semibold dark:text-white">
                       ONLY AVAILABLE ON OFFLINE STORE.
                     </h2>
-                    <p className="text-5xl text-center pt-20 font-extrabold text-black ">
+                    <p className="text-5xl text-center pt-20 font-extrabold text-black dark:text-white">
                       {convertToRupiah(i.price)}
                     </p>
                   </div>
@@ -109,6 +126,8 @@ const BeanDetail = () => {
           ))}
         </div>
       </section>
+    </>
+    )}
     </>
   );
 };

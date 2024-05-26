@@ -3,9 +3,12 @@ import { supabase } from "../createClient";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import Navbar from "../components/Navbar";
+import Swal from "sweetalert2";
+import { InfinitySpin } from "react-loader-spinner";
 
 const CoffeeDetail = () => {
   const [getDetail, setGetDetail] = useState({});
+  const [loading, setLoading] = useState(true);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -51,17 +54,41 @@ const CoffeeDetail = () => {
               cart_images: getDetail.images,
             },
           ]);
-        if (!error) {
-          alert("Add to cart successful!");
+          if (!error) {
+            Swal.fire({
+              title: 'Success!',
+              text: 'Add to cart successful!',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+          } else {
+            console.error("Error adding to cart:", error.message);
+            Swal.fire({
+              title: 'Error!',
+              text: 'Failed to add to cart.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
         } else {
-          console.error("Error adding to cart:", error.message);
+          Swal.fire({
+            title: 'Error!',
+            text: 'Product not found.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
+      } catch (error) {
+        console.error("Error adding to cart:", error.message);
+        Swal.fire({
+          title: 'Error!',
+          text: 'An error occurred, please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        navigate("/login"); // Ensure 'navigate' is defined and imported from 'react-router-dom'
       }
-    } catch (error) {
-      console.error("Error adding to cart:", error.message);
-      navigate("/login");
     }
-  }
 
   const toRupiah = (price, options = {}) => {
     const dot = options.dot || '.';
@@ -81,16 +108,31 @@ const CoffeeDetail = () => {
   }
 
   useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
     fetchDetail(id); // Mengambil detail berdasarkan ID dari URL
   }, [id]);
 
   return (
     <>
+      {loading ? (
+        <div className="h-screen bg-white flex justify-center items-center">
+          <InfinitySpin
+            visible={true}
+            width="200"
+            color="#000"
+            ariaLabel="infinity-spin-loading"
+          />
+        </div>
+      ) : (
+    <>
       <Navbar />
-      <section className="h-screen flex justify-center items-center bg-[#F3F4F6]">
+      <section className="h-screen flex justify-center items-center bg-[#F3F4F6] dark:bg-[#221f1f]">
         <div className="pt-10">
           <div
-            className="card lg:card-side h-auto lg:h-[550px] w-full lg:w-[1300px] lg:rounded-sm rounded-none shadow-xl bg-white mt-7"
+            className="card lg:card-side h-auto lg:h-[550px] w-full lg:w-[1300px] lg:rounded-sm rounded-none shadow-xl bg-white dark:bg-black mt-7"
             key={getDetail.id}
           >
             <figure className="w-full lg:w-[490px]">
@@ -101,10 +143,10 @@ const CoffeeDetail = () => {
               />
             </figure>
             <div className="card-body">
-              <h2 className="card-title text-3xl text-black">
+              <h2 className="card-title text-3xl text-black dark:text-white">
                 {getDetail.coffee_name}
               </h2>
-              <p className="text-balance py-5 font-medium text-gray-300 lg:w-[500px] lg:h-44">
+              <p className="text-balance py-5 font-medium text-gray-600 dark:text-gray-400 lg:w-[500px] lg:h-44">
                 {showFullDesc ? getDetail.coffee_description : truncate(getDetail.coffee_description, 150)}
                 {!showFullDesc && getDetail.coffee_description && getDetail.coffee_description.length > 150 && (
                   <button className="text-blue-500 text-balance text-center" onClick={() => setShowFullDesc(true)}>read more</button>
@@ -112,18 +154,18 @@ const CoffeeDetail = () => {
               </p>
               <div className="flex w-full justify-between">
                 <div className="flex-col w-40">
-                  <h2 className="text-lg text-black">price</h2>
-                  <h1 className="text-2xl text-black font-bold mt-1">
+                  <h2 className="text-lg text-black dark:text-white">price</h2>
+                  <h1 className="text-2xl text-black font-bold mt-1 dark:text-white">
                     {toRupiah(getDetail.coffee_price)}
                   </h1>
                 </div>
               </div>
               <div className="flex w-full">
-                <button className="btn bg-white hover:bg-white border-none rounded-s-md rounded-e-none w-1/2">
+                <button className="btn text-black bg-white dark:border-none rounded-s-md rounded-e-none w-1/2">
                   Buy
                 </button>
                 <button
-                  className="btn bg-black text-white hover:bg-black rounded-e-md rounded-s-none w-1/2"
+                  className="btn bg-black text-white border border-white rounded-e-md rounded-s-none w-1/2"
                   onClick={() => addCart(getDetail.id)}
                 >
                   Cart
@@ -134,6 +176,8 @@ const CoffeeDetail = () => {
         </div>
       </section>
     </>
+      )}
+      </>
   );
 };
 
