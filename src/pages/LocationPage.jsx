@@ -7,7 +7,7 @@ const LocationPage = () => {
       <section className="location h-[40vh] bg-[#F3F4F6] relative dark:bg-[#221f1f]" id="location">
         <div className="flex flex-col justify-center items-center h-full ">
           <img
-            src="./public/images/locationbg.png"
+            src="../images/locationbg.png"
             className="w-full h-72 object-cover absolute brightness-50"
             alt="Background"
           />
